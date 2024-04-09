@@ -4,6 +4,7 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
+from fastapi import HTTPException
 
 router = APIRouter(
     prefix="/carts",
