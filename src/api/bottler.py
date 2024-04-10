@@ -43,16 +43,14 @@ def get_bottle_plan():
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     
     potionQuantity = (result.first()).num_green_ml // 100
-    if potionQuantity > 0:
-
-        return [
-                {
-                    "potion_type": [0, 100, 0, 0],
-                    "quantity": potionQuantity,
-                }
-            ]
-    else:
-        return []
+  
+    #return number of potions. if num_green_ml == 0, potionQuantity will be 0
+    return [
+            {
+                "potion_type": [0, 100, 0, 0],
+                "quantity": potionQuantity,
+            }
+        ]
 
 if __name__ == "__main__":
     print(get_bottle_plan())
