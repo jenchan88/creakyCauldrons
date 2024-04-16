@@ -109,16 +109,16 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT num_green_ml FROM global_inventory"
+        sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
         result = connection.execute(sqlalchemy.text(sql_to_execute))
         firstRow = result.first()
     if firstRow is None or firstRow[0] < 1:
         raise HTTPException(status_code=400)
     
     with db.engine.begin() as connection:
-        sql_to_execute = "UPDATE global_inventory SET num_green_potions=num_green_potions-1"
+        sql_to_execute = """UPDATE global_inventory SET num_green_potions=num_green_potions-1"""
         connection.execute(sqlalchemy.text(sql_to_execute))
-        sql_to_execute = "UPDATE global_inventory SET gold=gold+50"
+        sql_to_execute = """UPDATE global_inventory SET gold=gold+50""" 
         connection.execute(sqlalchemy.text())
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}

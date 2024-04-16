@@ -15,7 +15,7 @@ def get_catalog():
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     firstRow = result.first()
-    if(firstRow.num_green_potions > 0):
+    if(firstRow.num_red_potions > 0):
         return [
                 {
                     "sku": "GREEN_POTION_0",
