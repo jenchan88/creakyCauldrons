@@ -6,6 +6,9 @@ import sqlalchemy
 from src import database as db
 from fastapi import HTTPException
 
+cart = {}
+cartIDCount = 0
+
 router = APIRouter(
     prefix="/carts",
     tags=["cart"],
@@ -112,6 +115,7 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    global cart
     potionSku = cart[cart_id][0]
     numPotions = cart[cart_id][1]
     totalGoldPaid = 0
