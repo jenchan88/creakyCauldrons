@@ -133,7 +133,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             sql_to_execute = f"""UPDATE global_inventory 
                                 SET num_red_potions = num_red_potions - {numPotions}, 
                                 gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text())
+            connection.execute(sqlalchemy.text(sql_to_execute))
         elif potionSku == "GREEN_POTION_0":
             sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
@@ -143,7 +143,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             sql_to_execute = f"""UPDATE global_inventory 
                                 SET num_green_potions = num_green_potions - {numPotions}, 
                                 gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text())
+            connection.execute(sqlalchemy.text(sql_to_execute))
         elif potionSku == "BLUE_POTION_0":
             sql_to_execute = """SELECT num_blue_ml FROM global_inventory"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
@@ -153,7 +153,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             sql_to_execute = f"""UPDATE global_inventory 
                                 SET num_blue_potions = num_blue_potions - {numPotions}, 
                                 gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text())
+            connection.execute(sqlalchemy.text(sql_to_execute))
         totalGoldPaid = numPotions * 50
 
     return {"total_potions_bought": numPotions, "total_gold_paid": totalGoldPaid}
