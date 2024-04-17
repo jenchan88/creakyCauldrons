@@ -40,7 +40,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     
     
     with db.engine.begin() as connection:
-        sql_to_execute = f"""UPDATE global_inventory SET gold=gold-{totalCost}, num_red_ml = num_red_ml + {totalRed}, num_green_ml = num_green_ml + {totalGreen}, num_blue_ml = num_blue_ml + {totalBlue}"""
+        sql_to_execute = f"""UPDATE global_inventory 
+                            SET gold = gold - {totalCost}, 
+                            num_red_ml = num_red_ml + {totalRed}, 
+                            num_green_ml = num_green_ml + {totalGreen}, 
+                            num_blue_ml = num_blue_ml + {totalBlue}"""
         connection.execute(sqlalchemy.text(sql_to_execute))
     return "OK"
 
@@ -69,7 +73,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         return [
             {            
-                "sku": "SMALL_RED_BARREL",
+                "sku": "SMALL_GREEN_BARREL",
                 "quantity": 1
             }
         ]
@@ -77,7 +81,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         return [
             {            
-                "sku": "SMALL_GREEN_BARREL",
+                "sku": "SMALL_BLUE_BARREL",
                 "quantity": 1
             }
         ]
