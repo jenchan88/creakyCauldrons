@@ -120,12 +120,12 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     numPotions = cart[cart_id][1]
     totalGoldPaid = 0
 
-    
-
     with db.engine.begin() as connection:
         if potionSku == "RED_POTION_0":
             # check if number of potions is 0 or none before attempting to sell potion
-            sql_to_execute = """SELECT num_red_ml FROM global_inventory"""
+            sql_to_execute = """
+                            SELECT num_red_ml FROM global_inventory
+                            """
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
             if firstRow is None or firstRow[0] < numPotions:
@@ -135,7 +135,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                 gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text(sql_to_execute))
         elif potionSku == "GREEN_POTION_0":
-            sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
+            sql_to_execute = """
+            SELECT num_green_ml FROM global_inventory
+            """
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
             if firstRow is None or firstRow[0] < numPotions:
@@ -145,7 +147,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                 gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text(sql_to_execute))
         elif potionSku == "BLUE_POTION_0":
-            sql_to_execute = """SELECT num_blue_ml FROM global_inventory"""
+            sql_to_execute = """
+            SELECT num_blue_ml FROM global_inventory
+            """
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
             if firstRow is None or firstRow[0] < numPotions:

@@ -54,7 +54,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
     with db.engine.begin() as connection:
-        sql_to_execute = """SELECT num_red_potions, num_green_potions, num_blue_potions, gold FROM global_inventory"""
+        sql_to_execute = """
+        SELECT num_red_potions, num_green_potions, num_blue_potions, gold FROM global_inventory
+        """
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     firstRow = result.first()

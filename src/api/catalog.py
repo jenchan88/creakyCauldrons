@@ -13,7 +13,9 @@ def get_catalog():
 
     availPotions = []
     with db.engine.begin() as connection:
-        sql_to_execute = """SELECT num_red_potions, num_green_potions, num_blue_potions FROM global_inventory"""
+        sql_to_execute = """
+        SELECT num_red_potions, num_green_potions, num_blue_potions FROM global_inventory
+        """
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     firstRow = result.first()
