@@ -123,24 +123,24 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             sql_to_execute = """SELECT num_red_ml FROM global_inventory"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
-            if firstRow is None or firstRow[0] < 1:
-                raise HTTPException(status_code=400)
+            if firstRow is None or firstRow[0] < numPotions:
+                raise HTTPException(status_code=400, detail="not enough potions in stock")
             sql_to_execute = f"""UPDATE global_inventory SET num_red_potions=num_red_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text())
         elif potionSku == "GREEN_POTION_0":
             sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
-            if firstRow is None or firstRow[0] < 1:
-                raise HTTPException(status_code=400)
+            if firstRow is None or firstRow[0] < numPotions:
+                raise HTTPException(status_code=400, detail="not enough potions in stock")
             sql_to_execute = f"""UPDATE global_inventory SET num_green_potions=num_green_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text())
         elif potionSku == "BLUE_POTION_0":
             sql_to_execute = """SELECT num_blue_ml FROM global_inventory"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
-            if firstRow is None or firstRow[0] < 1:
-                raise HTTPException(status_code=400)
+            if firstRow is None or firstRow[0] < numPotions:
+                raise HTTPException(status_code=400, detail="not enough potions in stock")
             sql_to_execute = f"""UPDATE global_inventory SET num_blue_potions=num_blue_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text())
         totalGoldPaid = numPotions * 50
