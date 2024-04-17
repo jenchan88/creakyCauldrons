@@ -88,7 +88,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    return {"cart_id": 1}
+    global cartIDCount
+    cartIDCount += 1
+    return {"cart_id": cartIDCount}
 
 
 class CartItem(BaseModel):
@@ -98,7 +100,8 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-
+    global cart
+    cart[cart_id] = (item_sku, cart_item.quantity)
     return "OK"
 
 
@@ -108,17 +111,38 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    with db.engine.begin() as connection:
-        sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-        firstRow = result.first()
-    if firstRow is None or firstRow[0] < 1:
-        raise HTTPException(status_code=400)
-    
-    with db.engine.begin() as connection:
-        sql_to_execute = """UPDATE global_inventory SET num_green_potions=num_green_potions-1"""
-        connection.execute(sqlalchemy.text(sql_to_execute))
-        sql_to_execute = """UPDATE global_inventory SET gold=gold+50""" 
-        connection.execute(sqlalchemy.text())
+    potionSku = cart[cart_id][0]
+    numPotions = cart[cart_id][1]
+    totalGoldPaid = 0
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    
+
+    with db.engine.begin() as connection:
+        if potionSku == "RED_POTION_0":
+            # check if number of potions is 0 or none before attempting to sell potion
+            sql_to_execute = """SELECT num_red_ml FROM global_inventory"""
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
+            firstRow = result.first()
+            if firstRow is None or firstRow[0] < 1:
+                raise HTTPException(status_code=400)
+            sql_to_execute = f"""UPDATE global_inventory SET num_red_potions=num_red_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
+            connection.execute(sqlalchemy.text())
+        elif potionSku == "GREEN_POTION_0":
+            sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
+            firstRow = result.first()
+            if firstRow is None or firstRow[0] < 1:
+                raise HTTPException(status_code=400)
+            sql_to_execute = f"""UPDATE global_inventory SET num_green_potions=num_green_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
+            connection.execute(sqlalchemy.text())
+        elif potionSku == "BLUE_POTION_0":
+            sql_to_execute = """SELECT num_blue_ml FROM global_inventory"""
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
+            firstRow = result.first()
+            if firstRow is None or firstRow[0] < 1:
+                raise HTTPException(status_code=400)
+            sql_to_execute = f"""UPDATE global_inventory SET num_blue_potions=num_blue_potions-{numPotions}, gold=gold+({numPotions}* 50)"""
+            connection.execute(sqlalchemy.text())
+        totalGoldPaid = numPotions * 50
+
+    return {"total_potions_bought": numPotions, "total_gold_paid": totalGoldPaid}
