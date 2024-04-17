@@ -32,7 +32,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         numBluePotions += potion.quantity
     
     with db.engine.begin() as connection:
-        sql_to_execute = f"""UPDATE global_inventory SET num_red_potions=num_red_potions+{numRedPotions}, num_red_ml=num_red_ml-({numRedPotions}*100)num_green_potions=num_green_potions+{numGreenPotions},num_green_ml=num_green_ml-({numGreenPotions}*100), num_blue_potions=num_blue_potions+{numBluePotions},num_blue_ml=num_blue_ml-({numBluePotions}*100)"""
+        sql_to_execute = f"""UPDATE global_inventory 
+                            SET num_red_potions = num_red_potions + {numRedPotions}, 
+                            num_red_ml = num_red_ml - ({numRedPotions}*100),
+                            num_green_potions = num_green_potions + {numGreenPotions},
+                            num_green_ml = num_green_ml - ({numGreenPotions}*100), 
+                            num_blue_potions = num_blue_potions + {numBluePotions},
+                            num_blue_ml = num_blue_ml - ({numBluePotions}*100)"""
 
         connection.execute(sqlalchemy.text(sql_to_execute))
     return "OK"
