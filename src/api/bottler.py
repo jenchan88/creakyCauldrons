@@ -65,29 +65,29 @@ def get_bottle_plan():
         greenPots = ((result.first()).num_green_ml) // 100
         bluePots = ((result.first()).num_blue_ml) // 100
   
-    #return number of potions. if num_green_ml == 0, potionQuantity will be 0
-    if redPots != 0:
-        return [
-            {
-                "potion_type": [100, 0, 0, 0],
-                "quantity": redPots
-            }
-        ]
-    if greenPots != 0:
-        return [
-            {
-                "potion_type": [0, 100, 0, 0],
-                "quantity": greenPots
-            }
-        ]
-    if bluePots != 0:
-        return [
-            {
-                "potion_type": [0, 0, 100, 0],
-                "quantity": bluePots
-            }
-        ]
-    return []
+        #return number of potions. if num_green_ml == 0, potionQuantity will be 0
+        if redPots != 0:
+            return [
+                {
+                    "potion_type": [100, 0, 0, 0],
+                    "quantity": redPots
+                }
+            ]
+        if greenPots != 0:
+            return [
+                {
+                    "potion_type": [0, 100, 0, 0],
+                    "quantity": greenPots
+                }
+            ]
+        if bluePots != 0:
+            return [
+                {
+                    "potion_type": [0, 0, 100, 0],
+                    "quantity": bluePots
+                }
+            ]
+        return []
 
 if __name__ == "__main__":
     print(get_bottle_plan())
