@@ -159,5 +159,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                 gold=gold+({numPotions}* 50)"""
             connection.execute(sqlalchemy.text(sql_to_execute))
         totalGoldPaid = numPotions * 50
-
+    print("Total Potions Bought:", numPotions)
+    print("Total Gold Paid:", totalGoldPaid)
     return {"total_potions_bought": numPotions, "total_gold_paid": totalGoldPaid}

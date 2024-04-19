@@ -61,26 +61,26 @@ def get_bottle_plan():
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     
-    redPots = (result.first()).num_red_ml // 100
-    greenPots = (result.first()).num_green_ml // 100
-    bluePots = (result.first()).num_blue_ml // 100
+    redPots = ((result.first()).num_red_ml) // 100
+    greenPots = ((result.first()).num_green_ml) // 100
+    bluePots = ((result.first()).num_blue_ml) // 100
   
     #return number of potions. if num_green_ml == 0, potionQuantity will be 0
-    if redPots > 0:
+    if redPots != 0:
         return [
             {
                 "potion_type": [100, 0, 0, 0],
                 "quantity": redPots
             }
         ]
-    elif greenPots > 0:
+    if greenPots != 0:
         return [
             {
                 "potion_type": [0, 100, 0, 0],
                 "quantity": greenPots
             }
         ]
-    elif bluePots > 0:
+    if bluePots != 0:
         return [
             {
                 "potion_type": [0, 0, 100, 0],
