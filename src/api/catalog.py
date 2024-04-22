@@ -20,7 +20,7 @@ def get_catalog():
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     firstRow = result.first()
     if(firstRow.num_red_potions > 0):
-        availPotions.append([
+        availPotions.append(
             {
                 "sku": "RED_POTION_0",
                 "name": "red potion",
@@ -28,9 +28,9 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [100, 0, 0, 0]
             }
-        ])
+        )
     if(firstRow.num_green_potions > 0):
-        availPotions.append([
+        availPotions.append(
             {
                 "sku": "GREEN_POTION_0",
                 "name": "green potion",
@@ -38,9 +38,9 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [0, 100, 0, 0]
             }
-        ])
+        )
     if(firstRow.num_blue_potions > 0):
-        availPotions.append([
+        availPotions.append(
             {
                 "sku": "BLUE_POTION_0",
                 "name": "blue potion",
@@ -48,7 +48,7 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [0, 0, 100, 0]
             }
-        ])
+        )
     return availPotions
 
     
