@@ -35,7 +35,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     
     with db.engine.begin() as connection:
         try: 
-            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"))
+            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'CRANBERRY_red'"))
             redPotion = redPotion.fetchone()
             greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
             greenPotion = greenPotion.fetchone()
@@ -79,34 +79,51 @@ def get_bottle_plan():
     # Initial logic: bottle all barrels into red potions.
     with db.engine.begin() as connection:
         sql_to_execute = """
-        SELECT num_red_ml, num_green_ml, num_blue_ml FROM global_inventory
+        SELECT * FROM global_inventory
         """
 
-        num_red_ml, num_green_ml, num_blue_ml = connection.execute(sqlalchemy.text(sql_to_execute)).first()
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        firstRow = result.first()
+
+
     
-        redPots = (num_red_ml) // 100
-        greenPots = (num_green_ml) // 100
-        bluePots = (num_blue_ml) // 100
-  
-        #return number of potions. if num_green_ml == 0, potionQuantity will be 0
-        if redPots != 0:
+        redPots = firstRow.num_red_ml // 100
+        greenPots = firstRow.num_green_ml // 100
+        bluePots = firstRow.num_green_ml // 100
+        if firstRow.num_red_ml >= 50 and firstRow.num_green_ml >= 50:
+            purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
+            myPurplePotion = purplePotion.fetchone()
             return [
                 {
-                    "potion_type": [100, 0, 0, 0],
+                    "potion_type": [myPurplePotion.redPot, myPurplePotion.greenPot, myPurplePotion.bluePot, myPurplePotion.blackPot],
+                    "quantity": 1
+                }
+            ]
+        #return number of potions. if num_green_ml == 0, potionQuantity will be 0
+        if redPots != 0:
+            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'CRANBERRY_red'"))
+            myRedPotion = redPotion.fetchone()
+            return [
+                {
+                    "potion_type": [myRedPotion.redPot, myRedPotion.greenPot, myRedPotion.bluePot, myRedPotion.blackPot],
                     "quantity": redPots
                 }
             ]
         if greenPots != 0:
+            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+            myGreenPotion = greenPotion.fetchone()
             return [
                 {
-                    "potion_type": [0, 100, 0, 0],
+                    "potion_type": [myGreenPotion.redPot, myGreenPotion.greenPot, myGreenPotion.bluePot, myGreenPotion.blackPot],
                     "quantity": greenPots
                 }
             ]
         if bluePots != 0:
+            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+            myBluePotion = bluePotion.fetchone()
             return [
                 {
-                    "potion_type": [0, 0, 100, 0],
+                    "potion_type": [myBluePotion.redPot, myBluePotion.greenPot, myBluePotion.bluePot, myBluePotion.blackPot],
                     "quantity": bluePots
                 }
             ]
