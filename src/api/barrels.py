@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+from sqlite3 import IntegrityError
 
 router = APIRouter(
     prefix="/barrels",
@@ -23,72 +24,65 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
-    totalRed = 0
-    totalGreen = 0
-    totalBlue = 0
-    totalCost = 0
+    
 
-        
-    barrel = barrels_delivered[0]
-    totalCost += barrel.price
-    if barrel.sku == "SMALL_RED_BARREL":
-        totalRed += barrel.ml_per_barrel
-    elif barrel.sku == "SMALL_GREEN_BARREL":
-        totalGreen += barrel.ml_per_barrel
-    elif barrel.sku == "SMALL_BLUE_BARREL":
-        totalBlue += barrel.ml_per_barrel
-    
-    
     with db.engine.begin() as connection:
-        sql_to_execute = f"""UPDATE global_inventory 
-                            SET gold = gold - {totalCost}, 
-                            num_red_ml = num_red_ml + {totalRed}, 
-                            num_green_ml = num_green_ml + {totalGreen}, 
-                            num_blue_ml = num_blue_ml + {totalBlue}"""
-        connection.execute(sqlalchemy.text(sql_to_execute))
+        try:
+            if barrels_delivered:
+                barrel = barrels_delivered[0]
+                column = None
+                
+                if barrel.sku == "SMALL_RED_BARREL":
+                    column = "num_red_ml"
+                elif barrel.sku == "SMALL_GREEN_BARREL":
+                    column = "num_green_ml"
+                elif barrel.sku == "SMALL_BLUE_BARREL":
+                    column = "blue_ml"
+                #update global_inventory
+                if column:
+                    sql_to_execute = f"""
+                    UPDATE global_inventory SET gold = gold - :gold, {column} = {column} + :ml
+                    """
+                    connection.execute(sqlalchemy.text(sql_to_execute), {"gold": barrel.price, "ml": barrel.ml_per_barrel})
+        except IntegrityError:
+            return "Integrity Error"
     return "OK"
-
+    
+    
+    
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
-    
+    small_barrel_skus = {"SMALL_BLUE_BARREL", "SMALL_RED_BARREL", "SMALL_GREEN_BARREL"}
+
     print(wholesale_catalog)
     with db.engine.begin() as connection:
         sql_to_execute = """
-        SELECT num_red_potions, num_green_potions, num_blue_potions, gold FROM global_inventory
+        SELECT gold FROM global_inventory
         """
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     firstRow = result.first()
+    
+    
+    if firstRow is None:
+        print("can't find gold")
+        return []
     totalGold = firstRow.gold
-    
-    
-    if (totalGold >= 100 and firstRow.num_red_potions < 5):
 
-        return [
-            {            
-                "sku": "SMALL_RED_BARREL",
+    plan = []
+    for barrel in wholesale_catalog:
+        
+        if barrel.sku in small_barrel_skus:
+            #can't afford this barrel, move to next one
+            if totalGold < barrel.price:
+                continue
+            
+            plan.append({
+                "sku": barrel.sku,
                 "quantity": 1
-            }
-        ]
-    elif (totalGold >= 100 and firstRow.num_green_potions < 5):
-
-        return [
-            {            
-                "sku": "SMALL_GREEN_BARREL",
-                "quantity": 1
-            }
-        ]
-    elif (totalGold >= 120 and firstRow.num_blue_potions < 5):
-
-        return [
-            {            
-                "sku": "SMALL_BLUE_BARREL",
-                "quantity": 1
-            }
-        ]
-
-    return []
-
+            })
+            return plan
+    return plan
   
