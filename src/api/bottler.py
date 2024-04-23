@@ -21,28 +21,49 @@ class PotionInventory(BaseModel):
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
-    numRedPotions = 0
-    numGreenPotions = 0
-    numBluePotions = 0
+    # numRedPotions = 0
+    # numGreenPotions = 0
+    # numBluePotions = 0
 
-    potion = potions_delivered[0]
-    if potion.potion_type == [100, 0, 0, 0]:
-        numRedPotions += potion.quantity
-    elif potion.potion_type == [0, 100, 0, 0]:
-        numGreenPotions += potion.quantity
-    elif potion.potion_type == [0, 0, 100, 0]:
-        numBluePotions += potion.quantity
+    # potion = potions_delivered[0]
+    # if potion.potion_type == [100, 0, 0, 0]:
+    #     numRedPotions += potion.quantity
+    # elif potion.potion_type == [0, 100, 0, 0]:
+    #     numGreenPotions += potion.quantity
+    # elif potion.potion_type == [0, 0, 100, 0]:
+    #     numBluePotions += potion.quantity
     
     with db.engine.begin() as connection:
-        sql_to_execute = f"""UPDATE global_inventory 
-                            SET num_red_potions = num_red_potions + {numRedPotions}, 
-                            num_red_ml = num_red_ml - ({numRedPotions}*100),
-                            num_green_potions = num_green_potions + {numGreenPotions},
-                            num_green_ml = num_green_ml - ({numGreenPotions}*100), 
-                            num_blue_potions = num_blue_potions + {numBluePotions},
-                            num_blue_ml = num_blue_ml - ({numBluePotions}*100)"""
+        try: 
+            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"))
+            redPotion = redPotion.fetchone()
+            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+            greenPotion = greenPotion.fetchone()
+            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+            bluePotion = bluePotion.fetchone()
+            purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
+            purplePotion = purplePotion.fetchone()
+        except IntegrityError:
+            return "Integrity Error"
+        else:
+            newPotion = potions_delivered[0].potion_type
+            #code for red potion
+            if newPotion == [redPotion.redPot, redPotion.greenPot, redPotion.bluePot, redPotion.blackPot]: 
+                    connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + :potions, num_red_ml = num_red_ml - (100 * :potions)"), {"potions": newPotion.quantity})
 
-        connection.execute(sqlalchemy.text(sql_to_execute))
+                    
+            #code for green potion
+            if newPotion == [greenPotion.redPot, greenPotion.greenPot, greenPotion.bluePot, greenPotion.blackPot]: 
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + :potions, num_green_ml = num_green_ml - (100 * :potions)"), {"potions": newPotion.quantity})
+
+           
+            #blue potion
+            if newPotion == [bluePotion.redPot, bluePotion.greenPot, bluePotion.bluePot, bluePotion.blackPot]: 
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + :potions, num_blue_ml = num_blue_ml - (100 * :potions)"), {"potions": newPotion.quantity})
+            #purple potion
+            if newPotion == [purplePotion.redPot, purplePotion.greenPot, purplePotion.bluePot, purplePotion.blackPot]:  
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_purple_potions = num_purple_potions + :potions, num_red_ml = num_red_ml - (50 * :potions), num_blue_ml = num_blue_ml - (50 * :potions)"), {"potions": newPotion.quantity})
+    
     return "OK"
 
 @router.post("/plan")
