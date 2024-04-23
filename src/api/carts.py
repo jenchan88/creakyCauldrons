@@ -7,8 +7,7 @@ from src import database as db
 from fastapi import HTTPException
 from sqlite3 import IntegrityError
 
-cart = {}
-cartIDCount = 0
+
 
 router = APIRouter(
     prefix="/carts",
@@ -97,17 +96,20 @@ def create_cart(new_cart: Customer):
     # return {"cart_id": cartIDCount}
 
     sql_to_execute ="""
-                    "INSERT INTO carts_table (customer_name) VALUES (:name)"
+                    INSERT INTO carts_table (customer_name) VALUES (:name)
                     """
-                    connection.execute(sqlalchemy.text(sql_to_execute), {"gold": barrel.price, "ml": barrel.ml_per_barrel})
     with db.engine.begin() as connection:
         try:
-            connection.execute(sqlalchemy.text(), {"name": new_cart.customer_name})
+            connection.execute(sqlalchemy.text(sql_to_execute), {"name": new_cart.customer_name})
         except IntegrityError:
-            return "INTEGRITY ERROR!"
+            return "Integrity Error"
         else:
-            cart_id = connection.execute(sqlalchemy.text("SELECT cart_id FROM carts WHERE customer_name = :name"), [{"name": new_cart.customer_name}])
-    return {"cart_id": cart_id.fetchone()[0]}
+            sql_to_execute ="""
+                    SELECT cart_id FROM carts_table WHERE customer_name = :name
+                    """
+            result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": new_cart.customer_name})
+            firstRow = result.first()
+    return {"cart_id": firstRow.cart_id}
 
 class CartItem(BaseModel):
     quantity: int
@@ -116,13 +118,25 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    global cart
-    cart = {}
-    cart[cart_id] = (item_sku, cart_item.quantity)
-    return "OK"
-
+    # global cart
+    # cart = {}
+    # cart[cart_id] = (item_sku, cart_item.quantity)
     
-
+    with db.engine.begin() as connection:
+        try:
+            sql_to_execute ="""
+                    SELECT potID FROM potionOfferings WHERE potName = :name
+                    """
+            result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
+            potionID =  result.first().potID
+            sql_to_execute ="""
+                    INSERT INTO cart_items (cart_id_cust, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
+                    """
+            connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id, "potion_id": potionID, "quantity": cart_item.quantity})
+        except IntegrityError:
+            return "Integrity Error"
+    
+    return "OK"
 
 class CartCheckout(BaseModel):
     payment: str
@@ -130,50 +144,48 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    global cart
-    potionSku = cart[cart_id][0]
-    numPotions = cart[cart_id][1]
-    totalGoldPaid = 0
-
     with db.engine.begin() as connection:
-        if potionSku == "RED_POTION_0":
-            # check if number of potions is 0 or none before attempting to sell potion
+        try:
+    
+
             sql_to_execute = """
-                            SELECT num_red_ml FROM global_inventory
+                            SELECT * FROM cart_items WHERE cart_id_cust = :cart_id
                             """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
-            firstRow = result.first()
-            if firstRow is None or firstRow[0] < numPotions:
-                raise HTTPException(status_code=400, detail="not enough potions in stock")
-            sql_to_execute = f"""UPDATE global_inventory 
-                                SET num_red_potions = num_red_potions - {numPotions}, 
-                                gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text(sql_to_execute))
-        elif potionSku == "GREEN_POTION_0":
+            firstRow = connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id})
+            potType = firstRow.first().pot_type
+            quant = firstRow.first().amount
             sql_to_execute = """
-            SELECT num_green_ml FROM global_inventory
-            """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
-            firstRow = result.first()
-            if firstRow is None or firstRow[0] < numPotions:
-                raise HTTPException(status_code=400, detail="not enough potions in stock")
-            sql_to_execute = f"""UPDATE global_inventory 
-                                SET num_green_potions = num_green_potions - {numPotions}, 
-                                gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text(sql_to_execute))
-        elif potionSku == "BLUE_POTION_0":
-            sql_to_execute = """
-            SELECT num_blue_ml FROM global_inventory
-            """
-            result = connection.execute(sqlalchemy.text(sql_to_execute))
-            firstRow = result.first()
-            if firstRow is None or firstRow[0] < numPotions:
-                raise HTTPException(status_code=400, detail="not enough potions in stock")
-            sql_to_execute = f"""UPDATE global_inventory 
-                                SET num_blue_potions = num_blue_potions - {numPotions}, 
-                                gold=gold+({numPotions}* 50)"""
-            connection.execute(sqlalchemy.text(sql_to_execute))
-        totalGoldPaid = numPotions * 50
-    print("Total Potions Bought:", numPotions)
-    print("Total Gold Paid:", totalGoldPaid)
-    return {"total_potions_bought": numPotions, "total_gold_paid": totalGoldPaid}
+                            SELECT name FROM potionOfferings WHERE potID = :potType
+                            """
+            curPotName = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}]).first().potName
+
+                
+        # sql_to_execute = f"""UPDATE global_inventory 
+        #                             SET num_red_potions = num_red_potions - {numPotions}, 
+        #                             gold=gold+({numPotions}* 50)"""
+                
+                # Define prices and update global_inventory accordingly
+            potion_prices = {"CRANBERRY_red": 20, "ELF_green": 30, "STITCH_blue": 40, "GRIMACE_purple": 50}
+            
+            if  curPotName in potion_prices:
+                price_per_potion = potion_prices[curPotName]
+                if curPotName.endswith("_red"):
+                    color_column = "num_red_potions"
+                elif curPotName.endswith("_green"):
+                    color_column = "num_green_potions"
+                elif curPotName.endswith("_blue"):
+                    color_column = "num_blue_potions"
+                elif curPotName.endswith("_purple"):
+                    color_column = "num_purple_potions"
+                else:
+                    return "Invalid potion name"
+                connection.execute(
+            sqlalchemy.text(f"UPDATE global_inventory SET {color_column} = {color_column} - :potions, gold = gold + :total_gold"),
+            {"potions": quant, "total_gold": price_per_potion * quant}
+        )
+            totalGoldPaid = price_per_potion * quant
+        except IntegrityError:
+            return "Integrity Error"
+        
+
+    return {"total_potions_bought": quant, "total_gold_paid": totalGoldPaid}

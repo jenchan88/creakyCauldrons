@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
+from sqlite3 import IntegrityError
 
 router = APIRouter()
 
@@ -10,45 +11,63 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
-
-    availPotions = []
+    catalog = []
     with db.engine.begin() as connection:
-        sql_to_execute = """
-        SELECT num_red_potions, num_green_potions, num_blue_potions FROM global_inventory
-        """
+        potion_types = {
+            "Cranberry_red": ("num_red_potions", "SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"),
+            "ELF_green": ("num_green_potions", "SELECT * FROM potionOfferings WHERE name = 'ELF_green'"),
+            "STITCH_blue": ("blue_potions", "SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"),
+            "GRIMACE_purple": ("num_purple_potions", "SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'")
+        }
 
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-    firstRow = result.first()
-    if(firstRow.num_red_potions > 0):
-        availPotions.append(
-            {
-                "sku": "RED_POTION_0",
-                "name": "red potion",
-                "quantity": firstRow.num_red_potions,
-                "price": 50,
-                "potion_type": [100, 0, 0, 0]
-            }
-        )
-    if(firstRow.num_green_potions > 0):
-        availPotions.append(
-            {
-                "sku": "GREEN_POTION_0",
-                "name": "green potion",
-                "quantity": firstRow.num_green_potions,
-                "price": 50,
-                "potion_type": [0, 100, 0, 0]
-            }
-        )
-    if(firstRow.num_blue_potions > 0):
-        availPotions.append(
-            {
-                "sku": "BLUE_POTION_0",
-                "name": "blue potion",
-                "quantity": firstRow.num_blue_potions,
-                "price": 50,
-                "potion_type": [0, 0, 100, 0]
-            }
-        )
-    return availPotions
+        sql_to_execute = """SELECT * FROM global_inventory"""
+        inventory = connection.execute(sqlalchemy.text(sql_to_execute))
+        inventory = inventory.first()
+        redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"))
+        redPotion = redPotion.first()
+        bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+        bluePotion = bluePotion.first()
+        greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+        greenPotion = greenPotion.first()
+        purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
+        purplePotion.first()
+
+        if inventory.num_red_potions > 0:
+            catalog.append({
+                "sku": redPotion.potName,
+                    "name": redPotion.potName,
+                    "quantity": inventory.num_red_potions,
+                    "price": redPotion.price,
+                    "potion_type": [redPotion.redPot, redPotion.greenPot, redPotion.bluePot, redPotion.blackPot]
+            })
+        if inventory.num_green_potions > 0:
+            catalog.append({
+                "sku": greenPotion.potName,
+                    "name": greenPotion.potName,
+                    "quantity": inventory.num_green_potions,
+                    "price": greenPotion.price,
+                    "potion_type": [greenPotion.redPot, greenPotion.greenPot, greenPotion.bluePot, greenPotion.blackPot]
+            })
+        if inventory.num_blue_potions > 0:
+            catalog.append({
+                "sku": bluePotion.potName,
+                    "name": bluePotion.potName,
+                    "quantity": inventory.num_blue_potions,
+                    "price": bluePotion.price,
+                    "potion_type": [bluePotion.redPot, bluePotion.greenPot, bluePotion.bluePot, bluePotion.blackPot]
+            })
+        if inventory.num_purple_potions > 0:
+            catalog.append({
+                "sku": purplePotion.potName,
+                    "name": purplePotion.potName,
+                    "quantity": inventory.num_purple_potions,
+                    "price": purplePotion.price,
+                    "potion_type": [purplePotion.redPot, purplePotion.greenPot, purplePotion.bluePot, purplePotion.blackPot]
+            })
+        
+        
+    
+    return catalog
+
 
     
