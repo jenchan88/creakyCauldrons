@@ -5,6 +5,7 @@ from enum import Enum
 import sqlalchemy
 from src import database as db
 from fastapi import HTTPException
+from sqlite3 import IntegrityError
 
 cart = {}
 cartIDCount = 0
@@ -91,10 +92,22 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    global cartIDCount
-    cartIDCount += 1
-    return {"cart_id": cartIDCount}
+    # global cartIDCount
+    # cartIDCount += 1
+    # return {"cart_id": cartIDCount}
 
+    sql_to_execute ="""
+                    "INSERT INTO carts_table (customer_name) VALUES (:name)"
+                    """
+                    connection.execute(sqlalchemy.text(sql_to_execute), {"gold": barrel.price, "ml": barrel.ml_per_barrel})
+    with db.engine.begin() as connection:
+        try:
+            connection.execute(sqlalchemy.text(), {"name": new_cart.customer_name})
+        except IntegrityError:
+            return "INTEGRITY ERROR!"
+        else:
+            cart_id = connection.execute(sqlalchemy.text("SELECT cart_id FROM carts WHERE customer_name = :name"), [{"name": new_cart.customer_name}])
+    return {"cart_id": cart_id.fetchone()[0]}
 
 class CartItem(BaseModel):
     quantity: int
@@ -107,6 +120,8 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     cart = {}
     cart[cart_id] = (item_sku, cart_item.quantity)
     return "OK"
+
+    
 
 
 class CartCheckout(BaseModel):

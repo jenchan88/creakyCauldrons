@@ -43,4 +43,3 @@ create table
     constraint cartItemsCustIdForKey FOREIGN KEY (cart_id_cust) REFERENCES carts_table (cart_id),
     constraint cartItemsPotIdForKey FOREIGN KEY (pot_type) REFERENCES potionOfferings (potID)
   ) TABLESPACE pg_default;
-
