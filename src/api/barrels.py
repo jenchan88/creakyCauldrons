@@ -63,7 +63,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         """
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
-    firstRow = result.first()
+        firstRow = result.first()
     
     
     if firstRow is None:
