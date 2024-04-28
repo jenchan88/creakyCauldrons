@@ -95,14 +95,14 @@ def get_bottle_plan():
         bluePots = firstRow.num_green_ml // 100
 
         for potion in potions:
-            if potion.redPot <= num_red_ml and potion.bluePot <= num_blue_ml:
+            if potion.redpot <= num_red_ml and potion.bluepot <= num_blue_ml:
                 #purple logic
         
                 purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
                 myPurplePotion = purplePotion.fetchone()
                 return [
                     {
-                        "potion_type": [myPurplePotion.redPot, myPurplePotion.greenPot, myPurplePotion.bluePot, myPurplePotion.blackPot],
+                        "potion_type": [myPurplePotion.redpot, myPurplePotion.greenpot, myPurplePotion.bluepot, myPurplePotion.blackpot],
                         "quantity": 1
                     }
                 ]
@@ -112,7 +112,7 @@ def get_bottle_plan():
             myRedPotion = redPotion.fetchone()
             return [
                 {
-                    "potion_type": [myRedPotion.redPot, myRedPotion.greenPot, myRedPotion.bluePot, myRedPotion.blackPot],
+                    "potion_type": [myRedPotion.redpot, myRedPotion.greenpot, myRedPotion.bluepot, myRedPotion.blackpot],
                     "quantity": redPots
                 }
             ]
@@ -121,7 +121,7 @@ def get_bottle_plan():
             myGreenPotion = greenPotion.fetchone()
             return [
                 {
-                    "potion_type": [myGreenPotion.redPot, myGreenPotion.greenPot, myGreenPotion.bluePot, myGreenPotion.blackPot],
+                    "potion_type": [myGreenPotion.redpot, myGreenPotion.greenpot, myGreenPotion.bluepot, myGreenPotion.blackpot],
                     "quantity": greenPots
                 }
             ]
@@ -130,7 +130,7 @@ def get_bottle_plan():
             myBluePotion = bluePotion.fetchone()
             return [
                 {
-                    "potion_type": [myBluePotion.redPot, myBluePotion.greenPot, myBluePotion.bluePot, myBluePotion.blackPot],
+                    "potion_type": [myBluePotion.redpot, myBluePotion.greenpot, myBluePotion.bluepot, myBluePotion.blackpot],
                     "quantity": bluePots
                 }
             ]
