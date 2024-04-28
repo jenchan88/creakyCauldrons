@@ -128,7 +128,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
                     SELECT potID FROM potionOfferings WHERE potName = :name
                     """
             result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
-            potionID =  result.first().potID
+            potionID =  result.first().potid
             sql_to_execute ="""
                     INSERT INTO cart_items (cart_id_cust, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
                     """
@@ -155,7 +155,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             potType = firstRow.first().pot_type
             quant = firstRow.first().amount
             sql_to_execute = """
-                            SELECT name FROM potionOfferings WHERE potID = :potType
+                            SELECT name FROM potionOfferings WHERE potid = :potType
                             """
             curPotName = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}]).first().potName
 
