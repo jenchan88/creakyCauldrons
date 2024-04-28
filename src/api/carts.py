@@ -149,16 +149,22 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     
 
             sql_to_execute = """
-                            SELECT * FROM cart_items WHERE cart_id_cust = :cart_id
+                            SELECT pot_type, amount FROM cart_items WHERE cart_id_cust = :cart_id
                             """
-            firstRow = connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id})
-            potType = firstRow.first().pot_type
-            quant = firstRow.first().amount
+            result = connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id})
+            firstRow = result.fetchone()
+            potType = firstRow[0]
+            print(firstRow)
+            print("potion type: ", potType)
+            quant = firstRow[1]
+            
             sql_to_execute = """
-                            SELECT name FROM potionOfferings WHERE potid = :potType
+                            SELECT potname, price FROM potionOfferings WHERE potid = :potType
                             """
-            curPotName = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}]).first().potName
-
+            result = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}])
+            firstRow = result.fetchone()
+            curPotName = firstRow[0]
+            totalCost = firstRow[1]
                 
         # sql_to_execute = f"""UPDATE global_inventory 
         #                             SET num_red_potions = num_red_potions - {numPotions}, 
@@ -179,11 +185,16 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                     color_column = "num_purple_potions"
                 else:
                     return "Invalid potion name"
+
                 connection.execute(
             sqlalchemy.text(f"UPDATE global_inventory SET {color_column} = {color_column} - :potions, gold = gold + :total_gold"),
             {"potions": quant, "total_gold": price_per_potion * quant}
         )
             totalGoldPaid = price_per_potion * quant
+        # sql_to_execute = f"""
+        # UPDATE potionOfferings SET quantselling = quantselling - :potions WHERE potid = :potType
+        # """
+
         except IntegrityError:
             return "Integrity Error"
         
