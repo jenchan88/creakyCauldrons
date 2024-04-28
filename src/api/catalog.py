@@ -35,7 +35,7 @@ def get_catalog():
         if inven.num_red_potions > 0:
             catalog.append({
                 "sku": redPotion.potName,
-                    "name": redPotion.potName,
+                    "name": redPotion.potName, 
                     "quantity": inven.num_red_potions,
                     "price": redPotion.price,
                     "potion_type": [redPotion.redPot, redPotion.greenPot, redPotion.bluePot, redPotion.blackPot]

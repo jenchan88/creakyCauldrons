@@ -66,7 +66,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     
     return "OK"
 
-@router.post("/plan")
+@router.post("/plan") 
 def get_bottle_plan():
     """
     Go from barrel to bottle.
@@ -83,25 +83,32 @@ def get_bottle_plan():
         """
 
         result = connection.execute(sqlalchemy.text(sql_to_execute))
+        potions = connection.execute(sqlalchemy.text("SELECT * from potionOfferings"))
         firstRow = result.first()
 
-
+        num_red_ml = result.num_red_ml
+        num_green_ml = result.num_green_ml
+        num_blue_ml = result.num_blue_ml
     
         redPots = firstRow.num_red_ml // 100
         greenPots = firstRow.num_green_ml // 100
         bluePots = firstRow.num_green_ml // 100
-        if firstRow.num_red_ml >= 50 and firstRow.num_green_ml >= 50:
-            purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
-            myPurplePotion = purplePotion.fetchone()
-            return [
-                {
-                    "potion_type": [myPurplePotion.redPot, myPurplePotion.greenPot, myPurplePotion.bluePot, myPurplePotion.blackPot],
-                    "quantity": 1
-                }
-            ]
+
+        for potion in potions:
+            if potion.redPot <= num_red_ml and potion.bluePot <= num_blue_ml:
+                #purple logic
+        
+                purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
+                myPurplePotion = purplePotion.fetchone()
+                return [
+                    {
+                        "potion_type": [myPurplePotion.redPot, myPurplePotion.greenPot, myPurplePotion.bluePot, myPurplePotion.blackPot],
+                        "quantity": 1
+                    }
+                ]
         #return number of potions. if num_green_ml == 0, potionQuantity will be 0
         if redPots != 0:
-            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'CRANBERRY_red'"))
+            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
             myRedPotion = redPotion.fetchone()
             return [
                 {
@@ -110,7 +117,7 @@ def get_bottle_plan():
                 }
             ]
         if greenPots != 0:
-            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
             myGreenPotion = greenPotion.fetchone()
             return [
                 {
@@ -119,7 +126,7 @@ def get_bottle_plan():
                 }
             ]
         if bluePots != 0:
-            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
             myBluePotion = bluePotion.fetchone()
             return [
                 {
