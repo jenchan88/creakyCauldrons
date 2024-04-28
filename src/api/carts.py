@@ -125,7 +125,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     with db.engine.begin() as connection:
         try:
             sql_to_execute ="""
-                    SELECT potID FROM potionOfferings WHERE potName = :name
+                    SELECT potid FROM potionOfferings WHERE potName = :name
                     """
             result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
             potionID =  result.first().potid
