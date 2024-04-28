@@ -14,31 +14,31 @@ def get_catalog():
     catalog = []
     with db.engine.begin() as connection:
         potion_types = {
-            "Cranberry_red": ("num_red_potions", "SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"),
-            "ELF_green": ("num_green_potions", "SELECT * FROM potionOfferings WHERE name = 'ELF_green'"),
-            "STITCH_blue": ("blue_potions", "SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"),
-            "GRIMACE_purple": ("num_purple_potions", "SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'")
+            "Cranberry_red": ("num_red_potions", "SELECT * FROM potionOfferings WHERE potname = 'Cranberry_red'"),
+            "ELF_green": ("num_green_potions", "SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"),
+            "STITCH_blue": ("blue_potions", "SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"),
+            "GRIMACE_purple": ("num_purple_potions", "SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'")
         }
 
         sql_to_execute = """SELECT * FROM global_inventory"""
         inventory = connection.execute(sqlalchemy.text(sql_to_execute))
         inven = inventory.first()
-        redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'Cranberry_red'"))
+        redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'Cranberry_red'"))
         redPotion = redPotion.first()
-        bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+        bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
         bluePotion = bluePotion.first()
-        greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+        greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
         greenPotion = greenPotion.first()
-        purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
+        purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
         purPotion = purplePotion.first()
 
         if inven.num_red_potions > 0:
             catalog.append({
                 "sku": redPotion.potName,
-                    "name": redPotion.potName, 
+                    "name": redPotion.potName,  
                     "quantity": inven.num_red_potions,
                     "price": redPotion.price,
-                    "potion_type": [redPotion.redPot, redPotion.greenPot, redPotion.bluePot, redPotion.blackPot]
+                    "potion_type": [redPotion.redpot, redPotion.greenpot, redPotion.bluepot, redPotion.blackpot]
             })
         if inven.num_green_potions > 0:
             catalog.append({
@@ -46,7 +46,7 @@ def get_catalog():
                     "name": greenPotion.potName,
                     "quantity": inven.num_green_potions,
                     "price": greenPotion.price,
-                    "potion_type": [greenPotion.redPot, greenPotion.greenPot, greenPotion.bluePot, greenPotion.blackPot]
+                    "potion_type": [greenPotion.redpot, greenPotion.greenpot, greenPotion.bluepot, greenPotion.blackpot]
             })
         if inven.num_blue_potions > 0:
             catalog.append({
@@ -54,7 +54,7 @@ def get_catalog():
                     "name": bluePotion.potName,
                     "quantity": inven.num_blue_potions,
                     "price": bluePotion.price,
-                    "potion_type": [bluePotion.redPot, bluePotion.greenPot, bluePotion.bluePot, bluePotion.blackPot]
+                    "potion_type": [bluePotion.redpot, bluePotion.greenpot, bluePotion.bluepot, bluePotion.blackpot]
             })
         if inven.num_purple_potions > 0:
             catalog.append({
@@ -62,7 +62,7 @@ def get_catalog():
                     "name": purPotion.potName,
                     "quantity": inven.num_purple_potions,
                     "price": purPotion.price,
-                    "potion_type": [purPotion.redPot, purPotion.greenPot, purPotion.bluePot, purPotion.blackPot]
+                    "potion_type": [purPotion.redpot, purPotion.greenpot, purPotion.bluepot, purPotion.blackpot]
             })
         
         
