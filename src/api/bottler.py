@@ -86,9 +86,9 @@ def get_bottle_plan():
         potions = connection.execute(sqlalchemy.text("SELECT * from potionOfferings"))
         firstRow = result.first()
 
-        num_red_ml = result.num_red_ml
-        num_green_ml = result.num_green_ml
-        num_blue_ml = result.num_blue_ml
+        num_red_ml = firstRow.num_red_ml
+        num_green_ml = firstRow.num_green_ml
+        num_blue_ml = firstRow.num_blue_ml
     
         redPots = firstRow.num_red_ml // 100
         greenPots = firstRow.num_green_ml // 100
