@@ -35,34 +35,35 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     
     with db.engine.begin() as connection:
         try: 
-            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'CRANBERRY_red'"))
+            redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
             redPotion = redPotion.fetchone()
-            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'ELF_green'"))
+            greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
             greenPotion = greenPotion.fetchone()
-            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'STITCH_blue'"))
+            bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
             bluePotion = bluePotion.fetchone()
-            purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE name = 'GRIMACE_purple'"))
+            purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
             purplePotion = purplePotion.fetchone()
         except IntegrityError:
             return "Integrity Error"
         else:
-            newPotion = potions_delivered[0].potion_type
+            newPotionType = potions_delivered[0].potion_type
+            newPotionQuant = potions_delivered[0].quantity
             #code for red potion
-            if newPotion == [redPotion.redPot, redPotion.greenPot, redPotion.bluePot, redPotion.blackPot]: 
-                    connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + :potions, num_red_ml = num_red_ml - (100 * :potions)"), {"potions": newPotion.quantity})
+            if newPotionType == [redPotion.redpot, redPotion.greenpot, redPotion.bluepot, redPotion.blackpot]: 
+                    connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + :potions, num_red_ml = num_red_ml - (100 * :potions)"), {"potions": newPotionQuant})
 
                     
             #code for green potion
-            if newPotion == [greenPotion.redPot, greenPotion.greenPot, greenPotion.bluePot, greenPotion.blackPot]: 
-                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + :potions, num_green_ml = num_green_ml - (100 * :potions)"), {"potions": newPotion.quantity})
+            if newPotionType == [greenPotion.redpot, greenPotion.greenpot, greenPotion.bluepot, greenPotion.blackpot]: 
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + :potions, num_green_ml = num_green_ml - (100 * :potions)"), {"potions": newPotionQuant})
 
            
             #blue potion
-            if newPotion == [bluePotion.redPot, bluePotion.greenPot, bluePotion.bluePot, bluePotion.blackPot]: 
-                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + :potions, num_blue_ml = num_blue_ml - (100 * :potions)"), {"potions": newPotion.quantity})
+            if newPotionType == [bluePotion.redpot, bluePotion.greenpot, bluePotion.bluepot, bluePotion.blackpot]: 
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + :potions, num_blue_ml = num_blue_ml - (100 * :potions)"), {"potions": newPotionQuant})
             #purple potion
-            if newPotion == [purplePotion.redPot, purplePotion.greenPot, purplePotion.bluePot, purplePotion.blackPot]:  
-                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_purple_potions = num_purple_potions + :potions, num_red_ml = num_red_ml - (50 * :potions), num_blue_ml = num_blue_ml - (50 * :potions)"), {"potions": newPotion.quantity})
+            if newPotionType == [purplePotion.redpot, purplePotion.greenpot, purplePotion.bluepot, purplePotion.blackpot]:  
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_purple_potions = num_purple_potions + :potions, num_red_ml = num_red_ml - (50 * :potions), num_blue_ml = num_blue_ml - (50 * :potions)"), {"potions": newPotionQuant})
     
     return "OK"
 
