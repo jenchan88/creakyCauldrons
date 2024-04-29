@@ -96,20 +96,15 @@ def create_cart(new_cart: Customer):
     # return {"cart_id": cartIDCount}
 
     sql_to_execute ="""
-                    INSERT INTO carts_table (customer_name) VALUES (:name)
+                    INSERT INTO carts_table (customer_name) VALUES (:name) returning cart_id
                     """
     with db.engine.begin() as connection:
         try:
-            connection.execute(sqlalchemy.text(sql_to_execute), {"name": new_cart.customer_name})
+            cart_id = connection.execute(sqlalchemy.text(sql_to_execute), {"name": new_cart.customer_name}).scalar_one()
         except IntegrityError:
             return "Integrity Error"
-        else:
-            sql_to_execute ="""
-                    SELECT cart_id FROM carts_table WHERE customer_name = :name
-                    """
-            result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": new_cart.customer_name})
-            firstRow = result.first()
-    return {"cart_id": firstRow.cart_id}
+      
+    return {"cart_id": cart_id}
 
 class CartItem(BaseModel):
     quantity: int
@@ -127,10 +122,10 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
             sql_to_execute ="""
                     SELECT potid FROM potionOfferings WHERE potname = :name
                     """
-            result = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
-            potionID =  result.first()
+            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
+            
             sql_to_execute ="""
-                    INSERT INTO cart_items (cart_id_cust, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
+                    INSERT INTO cart_items (cart_id, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
                     """
             connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id, "potion_id": potionID, "quantity": cart_item.quantity})
         except IntegrityError:
@@ -149,10 +144,10 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     
 
             sql_to_execute = """
-                            SELECT pot_type, amount FROM cart_items WHERE cart_id_cust = :cart_id
+                            SELECT pot_type, amount FROM cart_items WHERE cart_id = :cart_id
                             """
             result = connection.execute(sqlalchemy.text(sql_to_execute), {"cart_id": cart_id})
-            firstRow = result.fetchone()
+            firstRow = result.first()
             potType = firstRow[0]
             print(firstRow)
             print("potion type: ", potType)
@@ -162,7 +157,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             SELECT potname, price FROM potionOfferings WHERE potid = :potType
                             """
             result = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}])
-            firstRow = result.fetchone()
+            firstRow = result.first()
             curPotName = firstRow[0]
             totalCost = firstRow[1]
                 
