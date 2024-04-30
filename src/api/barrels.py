@@ -31,19 +31,27 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             if barrels_delivered:
                 barrel = barrels_delivered[0]
                 column = None
+                potType = 0
+                message = None
                 
                 if barrel.sku == "SMALL_RED_BARREL":
                     column = "num_red_ml"
+                    potType = 1
+                    message = "buying 1 small red barrel"
                 elif barrel.sku == "SMALL_GREEN_BARREL":
                     column = "num_green_ml"
+                    potType = 3
+                    message = "buying 1 small green barrel"
                 elif barrel.sku == "SMALL_BLUE_BARREL":
                     column = "blue_ml"
+                    potType = 4
+                    message = "buying 1 small blue barrel"
                 #update global_inventory
                 if column:
                     sql_to_execute = f"""
-                    UPDATE global_inventory SET gold = gold - :gold, {column} = {column} + :ml
+                    INSERT into ledger (gold, numbml, potions, potiontype, descrip) VALUES (-:gold, 0, :numbml, :potType, :descrip) 
                     """
-                    connection.execute(sqlalchemy.text(sql_to_execute), {"gold": barrel.price, "ml": barrel.ml_per_barrel})
+                    connection.execute(sqlalchemy.text(sql_to_execute), {"gold": barrel.price, "numbml": barrel.ml_per_barrel, "potiontype":potType, "descrip":message})
         except IntegrityError:
             return "Integrity Error"
     return "OK"
@@ -58,25 +66,28 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     print(wholesale_catalog)
     with db.engine.begin() as connection:
-        sql_to_execute = """
-        SELECT gold FROM global_inventory
-        """
+        try:
+            
+            sql_to_execute = """
+            SELECT SUM(gold) FROM ledger
+            """
 
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-        firstRow = result.first()
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
+            firstRow = result.first()
+            if firstRow is None:
+                print("can't find gold")
+                return []
+            totalGold = firstRow.gold
+        except IntegrityError:
+            return "INTEGRITY ERROR!"
     
-    
-    if firstRow is None:
-        print("can't find gold")
-        return []
-    totalGold = firstRow.gold
 
     plan = []
     for barrel in wholesale_catalog:
         
         if barrel.sku in small_barrel_skus:
             #can't afford this barrel, move to next one
-            if totalGold < barrel.price:
+            if totalGold <= barrel.price:
                 continue
             
             plan.append({
