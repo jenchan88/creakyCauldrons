@@ -21,46 +21,50 @@ def get_catalog():
         # }
 
         sql_to_execute = """SELECT * FROM global_inventory"""
-        inventory = connection.execute(sqlalchemy.text(sql_to_execute))
-        inven = inventory.first()
+        # inventory = connection.execute(sqlalchemy.text(sql_to_execute))
+        # inven = inventory.first()
         redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
         redPotion = redPotion.first()
-        bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
-        bluePotion = bluePotion.first()
-        greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
+        redCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 1")).scalar_one()
+        greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
         greenPotion = greenPotion.first()
+        greenCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 3")).scalar_one()
+        bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
+        bluePotion = bluePotion.first()
+        blueCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 4")).scalar_one()
         purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
         purPotion = purplePotion.first()
-
-        if inven.num_red_potions > 0:
+        purCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 2")).scalar_one()
+        print("purCount", purCount)
+        if redCount > 0:
             catalog.append({
                 "sku": redPotion.potname,
                     "name": redPotion.potname,  
-                    "quantity": inven.num_red_potions,
+                    "quantity": 1,
                     "price": redPotion.price,
                     "potion_type": [redPotion.redpot, redPotion.greenpot, redPotion.bluepot, redPotion.blackpot]
             })
-        if inven.num_green_potions > 0:
+        if greenCount > 0:
             catalog.append({
                 "sku": greenPotion.potname,
                     "name": greenPotion.potname,
-                    "quantity": inven.num_green_potions,
+                    "quantity": 1,
                     "price": greenPotion.price,
                     "potion_type": [greenPotion.redpot, greenPotion.greenpot, greenPotion.bluepot, greenPotion.blackpot]
             })
-        if inven.num_blue_potions > 0:
+        if blueCount > 0:
             catalog.append({
                 "sku": bluePotion.potname,
                     "name": bluePotion.potname,
-                    "quantity": inven.num_blue_potions,
+                    "quantity": 1,
                     "price": bluePotion.price,
                     "potion_type": [bluePotion.redpot, bluePotion.greenpot, bluePotion.bluepot, bluePotion.blackpot]
             })
-        if inven.num_purple_potions > 0:
+        if purCount > 0:
             catalog.append({
                 "sku": purPotion.potname,
                     "name": purPotion.potname,
-                    "quantity": inven.num_purple_potions,
+                    "quantity": 1,
                     "price": purPotion.price,
                     "potion_type": [purPotion.redpot, purPotion.greenpot, purPotion.bluepot, purPotion.blackpot]
             })
