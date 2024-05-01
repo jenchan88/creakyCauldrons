@@ -50,30 +50,30 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             newPotionQuant = potions_delivered[0].quantity
             #code for red potion
             if newPotionType == [redPotion.redpot, redPotion.greenpot, redPotion.bluepot, redPotion.blackpot]: 
-                    sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, :potions, -:numbml, 1, 'bottling 1 red potion')"
+                    sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, :potions, -:numbml, 1, 'bottling 1 red potion')"
                     connection.execute(sqlalchemy.text(sql_to_execute), {"potions": newPotionQuant, "numbml": 100*newPotionQuant})
 
                     
             #code for green potion
             if newPotionType == [greenPotion.redpot, greenPotion.greenpot, greenPotion.bluepot, greenPotion.blackpot]: 
-                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, :potions, -:numbml, 3, 'bottling 1 green potion')"
+                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, :potions, -:numbml, 3, 'bottling 1 green potion')"
                 connection.execute(sqlalchemy.text(sql_to_execute), {"potions": newPotionQuant, "numbml": 100*newPotionQuant})
                 
            
             #blue potion
             if newPotionType == [bluePotion.redpot, bluePotion.greenpot, bluePotion.bluepot, bluePotion.blackpot]: 
-                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, :potions, -:numbml, 4, 'bottling 1 blue potion')"
+                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, :potions, -:numbml, 4, 'bottling 1 blue potion')"
                 connection.execute(sqlalchemy.text(sql_to_execute), {"potions": newPotionQuant, "numbml": 100*newPotionQuant})
             #purple potion
             if newPotionType == [purplePotion.redpot, purplePotion.greenpot, purplePotion.bluepot, purplePotion.blackpot]:  
-                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, :potions, -:numbml, 2, 'bottling 1 purple potion')"
+                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, :potions, -:numbml, 2, 'bottling 1 purple potion')"
                 connection.execute(sqlalchemy.text(sql_to_execute), {"potions": newPotionQuant, "numbml": 100*newPotionQuant})
 
                 #for red and blue comps making purple
-                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, 0, -:numbml, 1, 'red part of purple potion')"
+                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, 0, -:numbml, 1, 'red part of purple potion')"
                 connection.execute(sqlalchemy.text(sql_to_execute), {"numbml": 50 *newPotionQuant})
 
-                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, description) VALUES (0, 0, -:numbml, 4, 'blue part of purple potion')"
+                sql_to_execute = "INSERT INTO ledger (gold, potions, numbml, potionType, descrip) VALUES (0, 0, -:numbml, 4, 'blue part of purple potion')"
                 connection.execute(sqlalchemy.text(sql_to_execute), {"numbml": 50 *newPotionQuant})
 
                 
