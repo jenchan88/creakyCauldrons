@@ -23,8 +23,10 @@ def get_catalog():
         #sql_to_execute = """SELECT * FROM global_inventory"""
         # inventory = connection.execute(sqlalchemy.text(sql_to_execute))
         # inven = inventory.first()
+        
         redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
         redPotion = redPotion.first()
+        
         redCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 1")).scalar_one()
 
         greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))

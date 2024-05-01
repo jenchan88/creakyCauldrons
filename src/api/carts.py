@@ -116,14 +116,16 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     # global cart
     # cart = {}
     # cart[cart_id] = (item_sku, cart_item.quantity)
-    
+    print(f"set item quantity {cart_id} {item_sku}")
     with db.engine.begin() as connection:
         try:
             sql_to_execute ="""
                     SELECT potid FROM potionOfferings WHERE potname = :name
                     """
-            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
-            potionID = potionID.fetchone().potid
+                    
+            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
+            print(f"found potion {potionID}")
+            
             
             sql_to_execute ="""
                     INSERT INTO cart_items (cart_id, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
