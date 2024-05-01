@@ -17,7 +17,7 @@ def get_inventory():
     """ """
     try:
         with db.engine.begin() as connection:
-            sql_to_execute = """SELECT * FROM global_inventory"""
+            sql_to_execute = """SELECT SUM(potions), SUM(numbml), SUM(gold) FROM ledger"""
             result = connection.execute(sqlalchemy.text(sql_to_execute))
         firstRow = result.first()
 
@@ -25,7 +25,8 @@ def get_inventory():
     except IntegrityError:
             return "Integrity Error"
     #return {"number_of_potions": 0, "ml_in_barrels": 0, "gold": 0}
-    return {"red_potions": firstRow.num_red_potions, "red_ml": firstRow.num_red_ml,"green_potions": firstRow.num_green_potions, "green_ml": firstRow.num_green_ml, "gold": firstRow.gold, "blue_potions": firstRow.num_blue_potions, "blue_ml": firstRow.num_blue_potions, "purple_potions": firstRow.num_purple_potions, "purple_ml": firstRow.num_purple_ml}
+    # return {"red_potions": firstRow.num_red_potions, "red_ml": firstRow.num_red_ml,"green_potions": firstRow.num_green_potions, "green_ml": firstRow.num_green_ml, "gold": firstRow.gold, "blue_potions": firstRow.num_blue_potions, "blue_ml": firstRow.num_blue_potions, "purple_potions": firstRow.num_purple_potions, "purple_ml": firstRow.num_purple_ml}
+    return{"num_potions":firstRow[0], "barrel_mls": firstRow[1], "total_gold": firstRow[2]}
 # Gets called once a day
 @router.post("/plan")
 def get_capacity_plan():
@@ -42,12 +43,12 @@ def get_capacity_plan():
     try:
         with db.engine.begin() as connection:
             sql_to_execute = """
-                SELECT gold FROM global_inventory
+                SELECT SUM(gold) FROM ledger
             """
         
             result = connection.execute(sqlalchemy.text(sql_to_execute))
             firstRow = result.first()
-        goldTotal = firstRow.gold
+        goldTotal = firstRow[0]
             
         if goldTotal >= 2000:
             return {
@@ -77,7 +78,7 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
         total = 1000 * (capacity_purchase.potion_capacity + capacity_purchase.ml_capacity -2)
         with db.engine.begin() as connection:
             sql_to_execute = f"""
-                UPDATE global_inventory SET gold = gold - :total
+                INSERT INTO ledger (gold, descrip) VALUES (-1000 * :total, 'made purchase of capacity plan')
             """
             connection.execute(sqlalchemy.text(sql_to_execute), {"total": total})
     except IntegrityError:
