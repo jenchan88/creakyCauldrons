@@ -157,39 +157,44 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             SELECT potname, price FROM potionOfferings WHERE potid = :potType
                             """
             result = connection.execute(sqlalchemy.text(sql_to_execute), [{"potType": potType}])
-            firstRow = result.first()
-            curPotName = firstRow[0]
-            totalCost = firstRow[1]
+            potion = result.first()
+            curPotName = potion[0]
+            totalCost = potion[1]
                 
         # sql_to_execute = f"""UPDATE global_inventory 
         #                             SET num_red_potions = num_red_potions - {numPotions}, 
         #                             gold=gold+({numPotions}* 50)"""
                 
                 # Define prices and update global_inventory accordingly
-            potion_prices = {"CRANBERRY_red": 20, "ELF_green": 30, "STITCH_blue": 40, "GRIMACE_purple": 50}
+            # potion_prices = {"CRANBERRY_red": 20, "ELF_green": 30, "STITCH_blue": 40, "GRIMACE_purple": 50}
             
-            if  curPotName in potion_prices:
-                price_per_potion = potion_prices[curPotName]
-                if curPotName.endswith("_red"):
-                    color_column = "num_red_potions"
-                elif curPotName.endswith("_green"):
-                    color_column = "num_green_potions"
-                elif curPotName.endswith("_blue"):
-                    color_column = "num_blue_potions"
-                elif curPotName.endswith("_purple"):
-                    color_column = "num_purple_potions"
-                else:
-                    return "Invalid potion name"
+            # if  curPotName in potion_prices:
+            #     price_per_potion = potion_prices[curPotName]
+            #     if curPotName.endswith("_red"):
+            #         color_column = "num_red_potions"
+            #     elif curPotName.endswith("_green"):
+            #         color_column = "num_green_potions"
+            #     elif curPotName.endswith("_blue"):
+            #         color_column = "num_blue_potions"
+            #     elif curPotName.endswith("_purple"):
+            #         color_column = "num_purple_potions"
+            #     else:
+            #         return "Invalid potion name"p
 
-                connection.execute(
-            sqlalchemy.text(f"UPDATE global_inventory SET {color_column} = {color_column} - :potions, gold = gold + :total_gold"),
-            {"potions": quant, "total_gold": price_per_potion * quant}
-        )
-            totalGoldPaid = price_per_potion * quant
+        #         connection.execute(
+        #     sqlalchemy.text(f"UPDATE global_inventory SET {color_column} = {color_column} - :potions, gold = gold + :total_gold"),
+        #     {"potions": quant, "total_gold": price_per_potion * quant}
+        # )
+        #     totalGoldPaid = price_per_potion * quant
         # sql_to_execute = f"""
         # UPDATE potionOfferings SET quantselling = quantselling - :potions WHERE potid = :potType
         # """
 
+            sql_to_execute = """
+                                INSERT INTO ledger (gold, potions, numbml, potiontype, descrip) VALUES (:cost, -:potions, 0, :potionType, 'sold potion')
+                                """
+            connection.execute(sqlalchemy.text(sql_to_execute), {"cost": totalCost, "potionType": potType, "potions": quant})
+            totalGoldPaid = totalCost * quant
         except IntegrityError:
             return "Integrity Error"
         
