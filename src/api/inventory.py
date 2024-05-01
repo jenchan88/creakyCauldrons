@@ -81,5 +81,5 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
             """
             connection.execute(sqlalchemy.text(sql_to_execute), {"total": total})
     except IntegrityError:
-        return "INTEGRITY ERROR!"
+        return "integrity error!"
     return "OK"

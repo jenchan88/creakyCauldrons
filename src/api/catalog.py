@@ -20,7 +20,7 @@ def get_catalog():
         #     "GRIMACE_purple": ("num_purple_potions", "SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'")
         # }
 
-        sql_to_execute = """SELECT * FROM global_inventory"""
+        #sql_to_execute = """SELECT * FROM global_inventory"""
         # inventory = connection.execute(sqlalchemy.text(sql_to_execute))
         # inven = inventory.first()
         redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
