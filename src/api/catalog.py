@@ -25,16 +25,19 @@ def get_catalog():
         # inven = inventory.first()
         redPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'CRANBERRY_red'"))
         redPotion = redPotion.first()
-        redCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 1")).scalar_one()
+        redCount = (connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 1")).first())[0]
+
         greenPotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'ELF_green'"))
         greenPotion = greenPotion.first()
-        greenCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 3")).scalar_one()
+        greenCount = (connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 3")).first())[0]
+
         bluePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'STITCH_blue'"))
         bluePotion = bluePotion.first()
-        blueCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 4")).scalar_one()
+        blueCount = (connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 4")).first())[0]
+
         purplePotion = connection.execute(sqlalchemy.text("SELECT * FROM potionOfferings WHERE potname = 'GRIMACE_purple'"))
         purPotion = purplePotion.first()
-        purCount = connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 2")).scalar_one()
+        purCount = (connection.execute(sqlalchemy.text("SELECT SUM(potions) FROM ledger WHERE potiontype = 2")).first())[0]
         print("purCount", purCount)
         if redCount > 0:
             catalog.append({

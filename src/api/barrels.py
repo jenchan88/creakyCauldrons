@@ -77,7 +77,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if firstRow is None:
                 print("can't find gold")
                 return []
-            totalGold = firstRow.gold
+            totalGold = firstRow[0]
         except IntegrityError:
             return "INTEGRITY ERROR!"
     

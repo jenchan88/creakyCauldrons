@@ -122,7 +122,8 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
             sql_to_execute ="""
                     SELECT potid FROM potionOfferings WHERE potname = :name
                     """
-            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
+            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku})
+            potionID = potionID.fetchone().potid
             
             sql_to_execute ="""
                     INSERT INTO cart_items (cart_id, pot_type, amount) VALUES (:cart_id, :potion_id, :quantity)
