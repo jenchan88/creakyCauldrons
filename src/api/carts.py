@@ -117,13 +117,45 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     # cart = {}
     # cart[cart_id] = (item_sku, cart_item.quantity)
     print(f"set item quantity {cart_id} {item_sku}")
+    total_potions = 0
     with db.engine.begin() as connection:
         try:
-            sql_to_execute ="""
+            sql_to_execute = """
+            SELECT COALESCE(
+                (SELECT SUM(potions) FROM ledger WHERE potiontype = :potion_type), 0
+            ) AS total_potions
+            """
+            if item_sku == "CRANBERRY_red":
+                total_potions = connection.execute(sqlalchemy.text(sql_to_execute), {"potion_type": 1}).scalar_one()
+                
+                print(f"Total potions for potion type 1: {total_potions}")
+            elif item_sku == "ELF_green":
+                total_potions = connection.execute(sqlalchemy.text(sql_to_execute), {"potion_type": 3}).scalar_one()
+                
+                print(f"Total potions for potion type 3: {total_potions}")
+            elif item_sku == "STITCH_blue":
+                total_potions = connection.execute(sqlalchemy.text(sql_to_execute), {"potion_type": 4}).scalar_one()
+                
+                print(f"Total potions for potion type 4: {total_potions}")
+
+            elif item_sku == "GRIMACE_purple":
+                total_potions = connection.execute(sqlalchemy.text(sql_to_execute), {"potion_type": 2}).scalar_one()
+                
+                print(f"Total potions for potion type 2: {total_potions}")
+                
+            if total_potions is not None:
+                sql_to_execute ="""
                     SELECT potid FROM potionOfferings WHERE potname = :name
                     """
                     
-            potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
+                potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
+            else:
+                return HTTPException("No potion found")
+            # sql_to_execute ="""
+            #         SELECT potid FROM potionOfferings WHERE potname = :name
+            #         """
+                    
+            # potionID = connection.execute(sqlalchemy.text(sql_to_execute), {"name": item_sku}).scalar_one()
             print(f"found potion {potionID}")
             
             
