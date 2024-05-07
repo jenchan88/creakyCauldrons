@@ -58,6 +58,57 @@ def search_orders(
     time is 5 total line items.
     """
 
+    result = []
+    query = "SELECT cart_id, customer, potion_id, gold, time, potion_name FROM search_orders"
+    params = {}
+
+    if customer_name == "" and potion_sku == "":
+        if sort_order == search_sort_order.asc:
+            if sort_col == search_sort_options.timestamp:
+                query += " ORDER BY time ASC"
+            elif sort_col == search_sort_options.line_item_total:
+                query += " ORDER BY gold ASC"
+            elif sort_col == search_sort_options.item_sku:
+                query += " ORDER BY potion_name ASC"
+            elif sort_col == search_sort_options.customer_name:
+                query += " ORDER BY customer ASC"
+            else:
+                query += " ORDER BY cart_id ASC"
+        elif sort_order == search_sort_order.desc:
+            if sort_col == search_sort_options.timestamp:
+                query += " ORDER BY time DESC"
+            elif sort_col == search_sort_options.line_item_total:
+                query += " ORDER BY gold DESC"
+            elif sort_col == search_sort_options.item_sku:
+                query += " ORDER BY potion_name DESC"
+            elif sort_col == search_sort_options.customer_name:
+                query += " ORDER BY customer DESC"
+            else:
+                query += " ORDER BY cart_id DESC"
+    else:
+        if potion_sku and customer_name:
+            query += " WHERE UPPER(customer) LIKE UPPER(:name) AND UPPER(potion_name) LIKE UPPER(:p_name) ORDER BY potion_name, customer"
+            params = {"name": customer_name, "p_name": potion_sku}
+        elif potion_sku:
+            query += " WHERE UPPER(potion_name) LIKE UPPER(:p_name) ORDER BY potion_name"
+            params = {"p_name": potion_sku}
+        elif customer_name:
+            query += " WHERE UPPER(customer) LIKE UPPER(:name) ORDER BY customer"
+            params = {"name": customer_name}
+
+    with db.engine.begin() as connection:
+        rows = connection.execute(sqlalchemy.text(query), params)
+        for row in rows.fetchall():
+            result.append({
+                "line_item_id": row[0],
+                "item_sku": "1 " + row[5],
+                "customer_name": row[1],
+                "line_item_total": row[3],
+                "timestamp": row[4]
+            })
+
+    
+
     return {
         "previous": "",
         "next": "",
@@ -143,7 +194,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
                 
                 print(f"Total potions for potion type 2: {total_potions}")
                 
-            if total_potions is not None:
+            if total_potions != 0 or total_potions is not None:
                 sql_to_execute ="""
                     SELECT potid FROM potionOfferings WHERE potname = :name
                     """
