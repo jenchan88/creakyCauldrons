@@ -59,7 +59,7 @@ def search_orders(
     """
 
     result = []
-    query = "SELECT cart_id, customer, potion_id, gold, time, potion_name FROM search_orders"
+    query = "SELECT cart_id, customer_name, potion_id, gold, time, potion_name FROM search_orders"
     params = {}
 
     if customer_name == "" and potion_sku == "":
@@ -71,7 +71,7 @@ def search_orders(
             elif sort_col == search_sort_options.item_sku:
                 query += " ORDER BY potion_name ASC"
             elif sort_col == search_sort_options.customer_name:
-                query += " ORDER BY customer ASC"
+                query += " ORDER BY customer_name ASC"
             else:
                 query += " ORDER BY cart_id ASC"
         elif sort_order == search_sort_order.desc:
@@ -82,18 +82,18 @@ def search_orders(
             elif sort_col == search_sort_options.item_sku:
                 query += " ORDER BY potion_name DESC"
             elif sort_col == search_sort_options.customer_name:
-                query += " ORDER BY customer DESC"
+                query += " ORDER BY customer_name DESC"
             else:
                 query += " ORDER BY cart_id DESC"
     else:
         if potion_sku and customer_name:
-            query += " WHERE UPPER(customer) LIKE UPPER(:name) AND UPPER(potion_name) LIKE UPPER(:p_name) ORDER BY potion_name, customer"
+            query += " WHERE UPPER(customer_name) LIKE UPPER(:name) AND UPPER(potion_name) LIKE UPPER(:p_name) ORDER BY potion_name, customer_name"
             params = {"name": customer_name, "p_name": potion_sku}
         elif potion_sku:
             query += " WHERE UPPER(potion_name) LIKE UPPER(:p_name) ORDER BY potion_name"
             params = {"p_name": potion_sku}
         elif customer_name:
-            query += " WHERE UPPER(customer) LIKE UPPER(:name) ORDER BY customer"
+            query += " WHERE UPPER(customer_name) LIKE UPPER(:name) ORDER BY customer_name"
             params = {"name": customer_name}
 
     with db.engine.begin() as connection:
